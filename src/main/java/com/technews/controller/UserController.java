@@ -18,12 +18,14 @@ public class UserController {
     @Autowired
     VoteRepository voteRepository;
     @GetMapping("/api/users")
-    public List<User> getAllUser() {
+    public List<User> getAllUsers() {
         List<User> userList = repository.findAll();
         for (User u : userList) {
             List<Post> postList = u.getPosts();
-            for (Post p : postList) {
-                p.setVoteCount(voteRepository.countVotesByPostId(p.getId()));
+            if (postList != null) {
+                for (Post p : postList) {
+                    p.setVoteCount(voteRepository.countVotesByPostId(p.getId()));
+                }
             }
         }
         return userList;
@@ -33,13 +35,14 @@ public class UserController {
         User returnUser = repository.getById(id);
         List<Post> postList = returnUser.getPosts();
         for (Post p : postList) {
-            p.setVoteCount((voteRepository.countVotesByPostId(p.getId())));
+            p.setVoteCount(voteRepository.countVotesByPostId(p.getId()));
         }
         return returnUser;
     }
     @PostMapping("/api/users")
     public User addUser(@RequestBody User user) {
-        user.setPassword(BCrypt.hashpw(user.getPassword(),BCrypt.gensalt()));
+        // Encrypt password
+        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         repository.save(user);
         return user;
     }
